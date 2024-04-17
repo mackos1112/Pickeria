@@ -3,6 +3,24 @@
 
 #include <iostream>
 
+class Platnosc
+{
+public:
+	Platnosc();
+	~Platnosc();
+
+private:
+
+};
+
+Platnosc::Platnosc()
+{
+}
+
+Platnosc::~Platnosc()
+{
+}
+
 int main()
 {
     std::cout << "Ciekawe czy to dziala\n";
