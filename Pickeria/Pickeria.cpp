@@ -3,27 +3,19 @@
 
 #include <iostream>
 
-class Platnosc
+class Platnosc	//pierwsza definicja klasy platnosc, raczej bardziej testowa niz cos szczegolnego
 {
-public:
-	Platnosc();
-	~Platnosc();
-
 private:
-
+	int statusPlatnosci = 0;
+public:
+	int zaplac() {
+		return 1;
+	}
 };
-
-Platnosc::Platnosc()
-{
-}
-
-Platnosc::~Platnosc()
-{
-}
 
 int main()
 {
-    std::cout << "Ciekawe czy to dziala\n";
+	std::cout << "Ciekawe czy to dziala\n";
 }
 
 // Uruchomienie programu: Ctrl + F5 lub menu Debugowanie > Uruchom bez debugowania
