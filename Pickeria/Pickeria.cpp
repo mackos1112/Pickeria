@@ -2,104 +2,93 @@
 #include <list>
 using namespace std;
 
-class Skladnik {
-private:
-    string nazwaSkladnika;
-    string jednostka;
-    double cenaJednostkowa;
-    static int id;
 
+
+
+class Rezerwacja {
+private:
+    int numerRezerwacji;
+
+    string imieKlienta;
+    string nazwiskoKlienta;
+    string numerTelefonu;
+    int iloscOsob;          //czy potrzebne?
+
+    int dataRezerwacji;
+    int godzinaRezerwacji;
+    int czasRezerwacji;     //jzk dlugo zajety
 public:
-    string getNazwaSkladnika() {
-        return nazwaSkladnika;
+    Rezerwacja(string imie, string nazwisko, string telefon, int osoby, int czas, int data, int godzina) {
+        //generowanie numeru rezerwacji - albo data i godzina, albo inkrementacja poprzedniej rezerwacji
+        imieKlienta = imie;
+        nazwiskoKlienta = nazwisko;
+        numerTelefonu = telefon;
+        iloscOsob = osoby;
+
+        dataRezerwacji = data;
+        godzinaRezerwacji = godzina;
+        czasRezerwacji = czas;
     }
 
-    string getJednostka() {
-        return jednostka;
+    Rezerwacja() {
+
     }
 
-    double getCenaJednostkowa() {
-        return cenaJednostkowa;
+    string getImie() {
+        return imieKlienta;
     }
 
-    int getID() {
-        return id;
+    string getNazwisko() {
+        return nazwiskoKlienta;
     }
 
-    void setNazwaSkladnika(string nazwa) {
-        this->nazwaSkladnika = nazwa;
+    string getNumer() {
+        return numerTelefonu;
     }
 
-    void setJednostka(string jednostka) {
-        this->jednostka = jednostka;
-    }
-
-    void setCenaJednostkowa(double cena) {
-        this->cenaJednostkowa = cena;
-    }
-
-    Skladnik(string nazwa, string jednostkaZ, double cena) {
-    
-        nazwaSkladnika = nazwa;
-        jednostka = jednostkaZ;
-        cenaJednostkowa = cena;
-
-        id++;
-    
-    }
-
-    ~Skladnik() {
-    
-    }
 };
 
-class ElementPosilku  {
+class Stolik {
 private:
-    Skladnik** skladnik;
-    int ilosc;
+    int numerStolika;
+    int liczbaMiejsc;
+    Rezerwacja tablicaRezerwacji[100];  //ile maksymalnie rezerwacji moze byc?
+    int ostatniaRezerwacja = 0;             //numer elemntu tablicy pod ktorym jest ostatnia rezerwacja
+    
 
+
+    static int iloscStolikow;
 public:
 
-    void setIlosc(int number) {
-        this->ilosc = number;
+    Stolik(int miejsca) {
+        iloscStolikow++;
+        numerStolika = iloscStolikow;
+        liczbaMiejsc = miejsca;
+
+    }
+    
+
+    bool zarezerwujStolik() {
+        //wprowadzenie danych rezerwacji
+
+        int i = ++ostatniaRezerwacja;
+        tablicaRezerwacji[i] = Rezerwacja();        //dac konstruktor wieloparametrowy
+
     }
 
-    int getIlosc() {
-        return ilosc;
-    }
-   
-    ElementPosilku(int size) : ilosc(size) {
-        skladnik = new Skladnik * [size];
+    void anulujRezerwacjeStolika(int numer){
+
+
     }
 
-   
-    ~ElementPosilku() {
-        delete[] skladnik;
+    static void wyswietlWolneStoliki(int data, int godzina) {
+
     }
+
+
 };
 
-class Posilek {
-private:
-    list<Skladnik> listaSkladnikow;
-    double cena;
-
-public:
-    double getCena() {
-        return cena;
-    }
-
-    void setCena(double cenaZ) {
-        this->cena = cenaZ;
-    }
-};
-
-class ElementZamowienia {
-private:
-    Posilek posilek;
-    int ilosc;
-};
-
-int Skladnik::id = 0;
+int Stolik::iloscStolikow = 0;
 
 int main()
 {
