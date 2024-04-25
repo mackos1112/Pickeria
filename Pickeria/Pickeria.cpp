@@ -55,7 +55,7 @@ public:
 
 class ElementPosilku  {
 private:
-    Skladnik** skladnik;
+    Skladnik** skladnik;  // pojedynczy skladnik
     int ilosc;
 
 public:
@@ -80,7 +80,7 @@ public:
 
 class Posilek {
 private:
-    list<Skladnik> listaSkladnikow;
+    list<Skladnik> listaSkladnikow;   //elementow posilku lista
     double cena;
 
 public:
@@ -90,18 +90,18 @@ public:
 
     void setCena(double cenaZ) {
         this->cena = cenaZ;
-    }
+    }                            //Konstruktor i destruktor
 };
 
 class ElementZamowienia {
 private:
     Posilek posilek;
-    int ilosc;
+    int ilosc;                    //Konstruktor i destruktor
 };
 
 int Skladnik::id = 0;
 
-int main()
+int main()                    //Dane o posilkach i elementach posilku
 {
     
 }
