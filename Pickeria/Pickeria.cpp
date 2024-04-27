@@ -1,4 +1,5 @@
-
+include <iostream>
+#include <string>
 #include <list>
 using namespace std;
 
@@ -8,8 +9,7 @@ using namespace std;
 
 class Rezerwacja {
 
-//#include <iostream>
-#include <string>
+
 
 using namespace std;
 
