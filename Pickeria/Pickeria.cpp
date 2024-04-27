@@ -2,6 +2,72 @@
 #include <list>
 using namespace std;
 
+
+//#include <iostream>
+#include <string>
+
+using namespace std;
+
+class Zamowienie	//placeholder zeby mi kompilator dzialal
+{
+public:
+	Zamowienie();
+	~Zamowienie();
+
+private:
+
+};
+
+Zamowienie::Zamowienie()
+{
+}
+
+Zamowienie::~Zamowienie()
+{
+}
+class Platnosc	//parametry przeniesione z diagramu
+{
+private:
+	int statusPlatnosci;	//mysle zeby statusy zrobic 0-9, obmnysle i napisze potem
+	float napiwek;
+	Zamowienie zamowienie;
+	int numerPlatnosci;
+
+public:
+	int zaplac() {
+		return 1;
+	}
+	void anulujPlatnosc() {
+		statusPlatnosci = 9;
+	}
+};
+class Gotowka
+{
+public:
+	Gotowka() {
+
+	}
+	~Gotowka();
+	
+private:
+	float otrzymanaGotowka;
+};
+class Karta
+{
+public:
+	Karta() {
+
+	}
+	~Karta();
+	void autoryzacja();
+private:
+	string nazwaKarty;
+	string typKarty;
+	string nazwaBanku;
+	int dataWaznosci;	//mozna potem zmienic na typ date
+};
+
+
 class Skladnik {
 private:
     string nazwaSkladnika;
