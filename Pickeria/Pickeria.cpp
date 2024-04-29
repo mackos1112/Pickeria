@@ -258,5 +258,132 @@ int Stolik::iloscStolikow = 0;
 
 
 int main() {
+	
+    int wybor;
+    bool kierownik = false;
+    cout << "MENU GLOWNE" << endl;
+    cout << "1. Klient" << endl;
+    cout << "2. Pracownik" << endl;
+    cout << "3. Kierownik" << endl;
+    cout << endl << "0. Zakoncz" << endl;
+    cin >> wybor;
+
+    system("cls");
+
+    switch (wybor){
+    case 1:
+        cout << "KLIENT" << endl;
+        cout << "1. Zarezerwuj stolik" << endl;
+        cout << "2. Zamow posilek" << endl;
+        cout << "3. Oplac zamowinie" << endl;       //czy konieczne? czy nie lepiej zintegrowac z zamowieniem posilku 
+        cout << "4. Anuluj rezerwacje stolika" << endl;     // use case - zwolnienie stolika
+        cout << "5. Anuluj zamowienie" << endl;
+        cout << endl << "0. Zakoncz" << endl;
+        cin >> wybor;
+
+        system("cls");
+
+        switch (wybor)
+        {
+        case 1:
+            //Rezerwacja stolika
+            cout << "Rezerwacja stolika" << endl;
+            break;
+        case 2:
+            //Zamawianie posilku
+            cout << "Zamawianie posilku" << endl;
+            break;
+        case 3:
+            //Oplacanie zamowienia
+            cout << "Oplacanie zamowienia" << endl;
+            break;
+        case 4:
+            //Anulowanie rezerwacji stolika
+            cout << "Anulowanie rezerwacji stolika" << endl;
+            break;
+        case 5:
+            //Anulowanie zamowienia
+            cout << "Anulowanie zamowienia" << endl;
+            break;
+        default:
+            break;
+        }
+        break;
+    case 2:
+    case 3:
+        
+        if(wybor==2) cout << "PRACOWNIK" << endl;
+        else {
+            cout << "KIEROWNIK" << endl;
+            kierownik = true;
+        }
+
+        cout << "1. Przygotowanie zamowienia" << endl;
+        cout << "2. Wydanie zamowienia" << endl;
+        cout << "3. Weryfikacja stanu magazynowego" << endl;        
+        cout << "4. Anuluj rezerwacje stolika" << endl;     
+        cout << "5. Anuluj zamowienie" << endl;
+        cout << "6. Generuj raport kasowy" << endl;
+
+        if (kierownik) {
+            cout << "7. Zamowienie towaru" << endl;
+            cout << "8. Zmiana menu" << endl;
+
+        }
+
+        cout << endl << "0. Zakoncz" << endl;
+        cin >> wybor;
+
+        system("cls");
+
+        switch (wybor)
+        {
+        case 1:
+            //Przygotowanie zamowienia
+            cout << "Przygotowanie zamowienia" << endl;
+            break;
+        case 2:
+            //Wydanie zamowienia
+            cout << "Wydanie zamowienia" << endl;
+            break;
+        case 3:
+            //Weryfikacja stanu magazynowego
+            cout << "Weryfikacja stanu magazynowego" << endl;
+            break;
+        case 4:
+            //Anulowanie rezerwacji stolika
+            cout << "Anulowanie rezerwacji stolika" << endl;
+            break;
+        case 5:
+            //Anulowanie zamowienia
+            cout << "Anulowanie zamowienia" << endl;
+            break;
+        case 6:
+            //raport kasowy
+            cout << "Raport kasowy" << endl;
+            break;
+        case 7:
+            if (kierownik) {
+                //zamowienie towaru
+                cout << "Towar" << endl;
+            }
+            break;
+        case 8:
+            if (kierownik) {
+                //zmiana menu
+                cout << "Nowe menu" << endl;
+            }
+            break;
+        default:
+            break;
+        }
+
+        break;
+    default:
+        break;
+    }
+
+	
+	
 	return 0;
 }
