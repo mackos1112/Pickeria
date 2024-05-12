@@ -254,6 +254,47 @@ public:
 
 int Stolik::iloscStolikow = 0;
 
+class SystemRestauracji {                       //singleton
+private:
+
+public:
+    SystemRestauracji() {
+
+    }
+
+    void WyswietlWolneStoliki() {
+
+    }
+
+    void WyswietlBiezaceMenu() {
+
+    }
+
+    void EdytujMenu() {
+
+    }
+
+    void SprawdzStanSkladnikow() {
+
+    }
+
+    void GenerujRaportStanowMagazynowych() {
+
+    }
+
+    void WprowadzenieTowaru() {
+
+    }
+
+    void RaportDobowy() {
+
+    }
+
+    void RaportMiesieczny() {
+
+    }
+
+};
 
 
 
