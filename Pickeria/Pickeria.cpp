@@ -218,26 +218,21 @@ private:
     int liczbaMiejsc;
     Rezerwacja tablicaRezerwacji[100];  //ile maksymalnie rezerwacji moze byc?
     int ostatniaRezerwacja = 0;             //numer elemntu tablicy pod ktorym jest ostatnia rezerwacja
-
-
-
     static int iloscStolikow;
+    
 public:
 
     Stolik(int miejsca) {
         iloscStolikow++;
         numerStolika = iloscStolikow;
         liczbaMiejsc = miejsca;
-
     }
-
 
     bool zarezerwujStolik() {
         //wprowadzenie danych rezerwacji
 
         int i = ++ostatniaRezerwacja;
         tablicaRezerwacji[i] = Rezerwacja();        //dac konstruktor wieloparametrowy
-
     }
 
     void anulujRezerwacjeStolika(int numer) {
@@ -248,16 +243,20 @@ public:
     static void wyswietlWolneStoliki(int data, int godzina) {
 
     }
-
+    static int getIloscStolikow() { //getter, nie ma go w diagramie klas -gicu
+        return iloscStolikow;
+    }
 
 };
-
 int Stolik::iloscStolikow = 0;
 
 
 
 
 int main() {
+
+    //wszystkie przyk³adowe stoliki w naszej restauracji
+    Stolik stoliki[7] = { Stolik(6), Stolik(6), Stolik(4), Stolik(4), Stolik(5), Stolik(5), Stolik(5)};
 	
     int wybor;
     bool kierownik = false;
@@ -266,6 +265,7 @@ int main() {
     cout << "2. Pracownik" << endl;
     cout << "3. Kierownik" << endl;
     cout << endl << "0. Zakoncz" << endl;
+    //cout <<"TEST___iloscStolikow "<< Stolik::getIloscStolikow();   //testowa getter, stoliki dzialaja -gicu
     cin >> wybor;
 
     system("cls");
