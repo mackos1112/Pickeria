@@ -234,10 +234,8 @@ private:
     int liczbaMiejsc;
 
     int ostatniaRezerwacja = 0;             //numer elemntu tablicy pod ktorym jest ostatnia rezerwacja
-
-
-
     static int iloscStolikow;
+    
 public:
     Rezerwacja tablicaRezerwacji[100];  //ile maksymalnie rezerwacji moze byc?
 
@@ -246,10 +244,11 @@ public:
         iloscStolikow++;
         numerStolika = iloscStolikow;
         liczbaMiejsc = miejsca;
-
     }
 
+
     void zarezerwujStolik(int data, int godzina) {      //data i godzina sa podawane podczas wywietlania stolikow
+
         //wprowadzenie danych rezerwacji
         string imie, nazwisko, telefon;
         int czas, osoby;
@@ -275,10 +274,12 @@ public:
         } while (osoby > liczbaMiejsc || osoby <= 0);
 
         int i = ++ostatniaRezerwacja;
+
         tablicaRezerwacji[i] = Rezerwacja(imie, nazwisko, telefon, osoby, czas, data, godzina);
 
         cout << "Twoj numer Rezerwacji: " << endl;
         cout << tablicaRezerwacji[i].getRezerwacja();
+
     }
 
     void anulujRezerwacjeStolika(int numer) {
@@ -290,15 +291,16 @@ public:
         return iloscStolikow;
     }
 
+
     int getOstatnia() {
         return ostatniaRezerwacja;
+
     }
 
     int getLiczbaMiejsc() {
         return liczbaMiejsc;
     }
 };
-
 int Stolik::iloscStolikow = 0;
 
 class SystemRestauracji {                       //singleton
@@ -366,7 +368,11 @@ public:
 int main() {
 
 
+
     SystemRestauracji* PICKERIA = new SystemRestauracji();
+
+	
+
     int wybor;
     bool kierownik = false;
     cout << "MENU GLOWNE" << endl;
@@ -374,6 +380,7 @@ int main() {
     cout << "2. Pracownik" << endl;
     cout << "3. Kierownik" << endl;
     cout << endl << "0. Zakoncz" << endl;
+    //cout <<"TEST___iloscStolikow "<< Stolik::getIloscStolikow();   //testowa getter, stoliki dzialaja -gicu
     cin >> wybor;
 
     system("cls");
