@@ -1,6 +1,7 @@
 #include <iostream>
 #include <list>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -10,6 +11,8 @@ private:
     string jednostka;
     double cenaJednostkowa;
     static int id;
+    int ilosc_na_magazynie;
+
 public:
     string getNazwaSkladnika() {
         return nazwaSkladnika;
@@ -27,6 +30,14 @@ public:
         return id;
     }
 
+    int getIlosc_na_magazynie() {
+        return ilosc_na_magazynie;
+    }
+
+    void setIlosc_na_magazynie(int ilosc) {
+        ilosc_na_magazynie = ilosc;
+    }
+
     void setNazwaSkladnika(string nazwa) {
         this->nazwaSkladnika = nazwa;
     }
@@ -39,40 +50,35 @@ public:
         this->cenaJednostkowa = cena;
     }
 
-    Skladnik(string nazwa, string jednostkaZ, double cena) {
-
+    Skladnik(string nazwa, string jednostkaZ, double cena) : ilosc_na_magazynie(0) {
         nazwaSkladnika = nazwa;
         jednostka = jednostkaZ;
         cenaJednostkowa = cena;
-
         id++;
-
     }
 
-    ~Skladnik() {
-
-    }
-
+    ~Skladnik() {}
 };
+
+int Skladnik::id = 0;
 
 class ElementPosilku {
 private:
-    Skladnik** skladnik;  // pojedynczy skladnik
-    int ilosc;
-public:
+    Skladnik** skladnik;
+    float ilosc;
 
-    void setIlosc(int number) {
+public:
+    void setIlosc(float number) {
         this->ilosc = number;
     }
 
-    int getIlosc() {
+    float getIlosc() {
         return ilosc;
     }
 
     ElementPosilku(int size) : ilosc(size) {
         skladnik = new Skladnik * [size];
     }
-
 
     ~ElementPosilku() {
         delete[] skladnik;
@@ -81,124 +87,171 @@ public:
 
 class Posilek {
 private:
-    list<Skladnik> listaSkladnikow;   //elementow posilku lista
-    double cena;
+    list<Skladnik> listaSkladnikow;
+    float cena;
 
 public:
-    double getCena() {
+    float getCena() {
         return cena;
     }
 
-    void setCena(double cenaZ) {
+    void setCena(float cenaZ) {
         this->cena = cenaZ;
-    }                            //Konstruktor i destruktor
+    }
+
+    void dodajSkladnik(Skladnik skladnik) {
+        listaSkladnikow.push_back(skladnik);
+    }
+
+    void usunSkladnik(Skladnik skladnik) {
+        listaSkladnikow.remove(skladnik);
+    }
+
+    Posilek() : cena(0) {}
 };
 
 class ElementZamowienia {
 private:
     Posilek posilek;
-    int ilosc;                    //Konstruktor i destruktor
-};
+    int ilosc;
 
-int Skladnik::id = 0;
-
-
-
-class Zamowienie {	//placeholder zeby mi kompilator dziala
 public:
-    Zamowienie() {
+    ElementZamowienia(Posilek p, int i) : posilek(p), ilosc(i) {}
 
+    int getIlosc() {
+        return ilosc;
     }
-    ~Zamowienie() {
 
+    Posilek getPosilek() {
+        return posilek;
     }
-
-private:
-
 };
 
-class Platnosc {	//parametry przeniesione z diagramu
+class Zamowienie {
 private:
-    int statusPlatnosci;	//mysle zeby statusy zrobic 0-9, obmnysle i napisze potem
-    float napiwek;
-    Zamowienie zamowienie;
+    int numerZamowienia;
+    list<ElementZamowienia> elementZamowienia;
+    float kwota;
+    int numerRezerwacji;
+    int statusZamowienia;
+
+public:
+    Zamowienie() : kwota(0), statusZamowienia(0) {}
+
+    void finalizujZamowienie() {
+        // Implementacja metody finalizujZamowienie
+    }
+
+    void anulujZamowienie() {
+        statusZamowienia = 9; // Status anulowane
+    }
+
+    void przygotujZamowienie() {
+        // Implementacja metody przygotujZamowienie
+    }
+
+    void setStatusZamowienia(int status) {
+        statusZamowienia = status;
+    }
+
+    void dodajElementZamowienia(ElementZamowienia element) {
+        elementZamowienia.push_back(element);
+    }
+
+    float getKwota() {
+        return kwota;
+    }
+
+    int getNumerZamowienia() {
+        return numerZamowienia;
+    }
+
+    void setNumerRezerwacji(int nr) {
+        numerRezerwacji = nr;
+    }
+
+    int getNumerRezerwacji() {
+        return numerRezerwacji;
+    }
+
+    int getStatusZamowienia() {
+        return statusZamowienia;
+    }
+};
+
+class Platnosc {
+private:
     int numerPlatnosci;
+    Zamowienie zamowienie;
+    float napiwek;
+    int statusPlatnosci;
 
 public:
     int zaplac() {
+        statusPlatnosci = 1; // Płatność zrealizowana
         return 1;
     }
+
     void anulujPlatnosc() {
-        statusPlatnosci = 9;
+        statusPlatnosci = 9; // Płatność anulowana
+    }
+
+    float getNapiwek() {
+        return napiwek;
+    }
+
+    int getStatusPlatnosci() {
+        return statusPlatnosci;
     }
 };
 
-class Gotowka {
+class Gotowka : public Platnosc {
 private:
     float otrzymanaGotowka;
 
 public:
-    Gotowka() {
-
+    void wydajReszte() {
+        // Implementacja metody wydajReszte
     }
-    ~Gotowka() {
-
-    }
-
 };
 
-class Karta {
+class Karta : public Platnosc {
 private:
     string nazwaKarty;
     string typKarty;
     string nazwaBanku;
-    int dataWaznosci;	//mozna potem zmienic na typ date
+    string dataWaznosci; // Typ zmieniony na string dla uproszczenia
 
 public:
-    Karta() {
-
-    }
-    ~Karta() {
-
-    }
     void autoryzacja() {
-
+        // Implementacja metody autoryzacja
     }
-
 };
-
-
 
 class Rezerwacja {
 private:
     string numerRezerwacji;
-
     string imieKlienta;
     string nazwiskoKlienta;
     string numerTelefonu;
     int iloscOsob;
+    int dataRezerwacji;
+    int godzinaRezerwacji;
+    int czasRezerwacji;
 
-    int dataRezerwacji;             //wstepnie dla uproszczenia data rezerwacji to dzien miesiaca
-    int godzinaRezerwacji;          //rezerwujemy tylko na pelne godziny(bez minut)
-    int czasRezerwacji;             //czas rezerwacji minimum 1h, calkowite godziny
 public:
     Rezerwacja(string imie, string nazwisko, string telefon, int osoby, int czas, int data, int godzina) {
-        //generowanie numeru rezerwacji - albo data i godzina, albo inkrementacja poprzedniej rezerwacji
         numerRezerwacji = imie.substr(0, 1) + nazwisko.substr(0, 1) + to_string(data) + "0" + to_string(godzina) + "o" + to_string(osoby);
-
         imieKlienta = imie;
         nazwiskoKlienta = nazwisko;
         numerTelefonu = telefon;
         iloscOsob = osoby;
-
         dataRezerwacji = data;
         godzinaRezerwacji = godzina;
         czasRezerwacji = czas;
     }
 
-    Rezerwacja() {
-
-    }
+    Rezerwacja() {}
 
     string getImie() {
         return imieKlienta;
@@ -216,29 +269,24 @@ public:
         return numerRezerwacji;
     }
 
-    bool czyKoliduje(int data, int godzina) {          //funckja pomocnicza abym nie musial pisac rozbudowanych warunkow
-        if (data != dataRezerwacji) return false;        //sprawdza czy podana data i godzina nie zachacza o jakas rezerwacje
-        else {                                          //uwzglednia czas rezerwacji
+    bool czyKoliduje(int data, int godzina) {
+        if (data != dataRezerwacji) return false;
+        else {
             if (godzina >= godzinaRezerwacji && godzina <= (godzinaRezerwacji + czasRezerwacji)) return false;
-            else return true;                          //zwraca true gdy podane godziny koliduja z ta rezerwacja
+            else return true;
         }
     }
-
 };
-
-
 
 class Stolik {
 private:
     int numerStolika;
     int liczbaMiejsc;
-
-    int ostatniaRezerwacja = 0;             //numer elemntu tablicy pod ktorym jest ostatnia rezerwacja
+    int ostatniaRezerwacja = 0;
     static int iloscStolikow;
-    
-public:
-    Rezerwacja tablicaRezerwacji[100];  //ile maksymalnie rezerwacji moze byc?
 
+public:
+    Rezerwacja tablicaRezerwacji[100];
 
     Stolik(int miejsca) {
         iloscStolikow++;
@@ -246,10 +294,7 @@ public:
         liczbaMiejsc = miejsca;
     }
 
-
-    void zarezerwujStolik(int data, int godzina) {      //data i godzina sa podawane podczas wywietlania stolikow
-
-        //wprowadzenie danych rezerwacji
+    void zarezerwujStolik(int data, int godzina) {
         string imie, nazwisko, telefon;
         int czas, osoby;
 
@@ -264,7 +309,7 @@ public:
         do {
             cout << "Jak dlugo: " << endl;
             cin >> czas;
-            if (czas <= 0)cout << "Bledny czas, sprobuj jeszcze raz" << endl;
+            if (czas <= 0) cout << "Bledny czas, sprobuj jeszcze raz" << endl;
         } while (czas <= 0);
         do {
             cout << "Ilosc osob: " << endl;
@@ -279,99 +324,106 @@ public:
 
         cout << "Twoj numer Rezerwacji: " << endl;
         cout << tablicaRezerwacji[i].getRezerwacja();
-
     }
 
     void anulujRezerwacjeStolika(int numer) {
-
-
+        // Implementacja anulowania rezerwacji stolika
     }
 
-    static int getIloscStolikow() { //getter, nie ma go w diagramie klas -gicu
+    static int getIloscStolikow() {
         return iloscStolikow;
     }
 
-
     int getOstatnia() {
         return ostatniaRezerwacja;
-
     }
 
     int getLiczbaMiejsc() {
         return liczbaMiejsc;
     }
+
+    bool czyWolny(int data, int godzina) {
+        for (int i = 0; i < ostatniaRezerwacja; i++) {
+            if (tablicaRezerwacji[i].czyKoliduje(data, godzina)) {
+                return false;
+            }
+        }
+        return true;
+    }
 };
+
 int Stolik::iloscStolikow = 0;
 
-class SystemRestauracji {                       //singleton
+class SystemRestauracji {
 private:
     Stolik stoliki[7] = { Stolik(6), Stolik(6), Stolik(4), Stolik(4), Stolik(5), Stolik(5), Stolik(5) };
-    //stoliki musza byc powiazane z systemem rezerwacji
+    vector<Skladnik> skladniki;
+    vector<Posilek> menu;
+    vector<Zamowienie> zamowienia;
+
 public:
-    SystemRestauracji() {
+    SystemRestauracji() {}
 
-    }
-
-    void WyswietlWolneStoliki(int data, int godzina) {
-        bool czy_wolny = true;
+    void wyswietlWolneStoliki(int data, int godzina) {
         cout << "WOLNE STOLIKI" << endl;
         for (int i = 0; i < Stolik::getIloscStolikow(); i++) {
-            for (int j = 0; j < stoliki[i].getOstatnia(); j++) {
-                if (stoliki[i].tablicaRezerwacji[j].czyKoliduje(data, godzina)) {
-                    czy_wolny = false;
-                    break;
-                }
-            }
-            if (czy_wolny) {
+            if (stoliki[i].czyWolny(data, godzina)) {
                 cout << i + 1 << ". Stolik numer " << i + 1 << endl;
                 cout << "Liczba miejsc: " << stoliki[i].getLiczbaMiejsc() << endl;
             }
         }
     }
 
-    Stolik getStolikONr(int nr_stolika) {
+    Stolik& getStolikONr(int nr_stolika) {
         return stoliki[nr_stolika - 1];
     }
 
-    void WyswietlBiezaceMenu() {
-
+    void wyswietlBiezaceMenu() {
+        for (Posilek& posilek : menu) {
+            cout << "Posilek: " << posilek.getCena() << " zl" << endl;
+            // Implementacja wyświetlania posiłków
+        }
     }
 
-    void EdytujMenu() {
-
+    void edytujMenu() {
+        // Implementacja edycji menu
     }
 
-    void SprawdzStanSkladnikow() {
-
+    void sprawdzStanSkladnikow() {
+        for (Skladnik& skladnik : skladniki) {
+            cout << "Skladnik: " << skladnik.getNazwaSkladnika() << ", Ilosc na magazynie: " << skladnik.getIlosc_na_magazynie() << endl;
+        }
     }
 
-    void GenerujRaportStanowMagazynowych() {
-
+    void generujRaportStanowMagazynowych() {
+        // Implementacja generowania raportu stanów magazynowych
     }
 
-    void WprowadzenieTowaru() {
-
+    void wprowadzenieTowaru() {
+        // Implementacja wprowadzania towaru
     }
 
-    void RaportDobowy() {
-
+    void raportDobowy() {
+        // Implementacja raportu dobowego
     }
 
-    void RaportMiesieczny() {
-
+    void raportMiesieczny() {
+        // Implementacja raportu miesięcznego
     }
 
+    void zamowieniePosilku(Zamowienie& zamowienie) {
+        zamowienia.push_back(zamowienie);
+        cout << "Zamowienie przyjete." << endl;
+    }
+
+    void anulowanieZamowienia(Zamowienie& zamowienie) {
+        zamowienie.anulujZamowienie();
+        cout << "Zamowienie anulowane." << endl;
+    }
 };
 
-
-
 int main() {
-
-
-
     SystemRestauracji* PICKERIA = new SystemRestauracji();
-
-	
 
     int wybor;
     bool kierownik = false;
@@ -380,7 +432,6 @@ int main() {
     cout << "2. Pracownik" << endl;
     cout << "3. Kierownik" << endl;
     cout << endl << "0. Zakoncz" << endl;
-    //cout <<"TEST___iloscStolikow "<< Stolik::getIloscStolikow();   //testowa getter, stoliki dzialaja -gicu
     cin >> wybor;
 
     system("cls");
@@ -390,18 +441,17 @@ int main() {
         cout << "KLIENT" << endl;
         cout << "1. Zarezerwuj stolik" << endl;
         cout << "2. Zamow posilek" << endl;
-        cout << "3. Oplac zamowinie" << endl;       //czy konieczne? czy nie lepiej zintegrowac z zamowieniem posilku 
-        cout << "4. Anuluj rezerwacje stolika" << endl;     // use case - zwolnienie stolika
+        cout << "3. Oplac zamowinie" << endl;
+        cout << "4. Anuluj rezerwacje stolika" << endl;
         cout << "5. Anuluj zamowienie" << endl;
         cout << endl << "0. Zakoncz" << endl;
         cin >> wybor;
 
         system("cls");
 
-        switch (wybor)
-        {
+        switch (wybor) {
         case 1:
-            //Rezerwacja stolika
+            // Rezerwacja stolika
             int data, godzina;
             cout << "Rezerwacja stolika" << endl;
             cout << "Podaj date: " << endl;
@@ -409,28 +459,28 @@ int main() {
             cout << "Podaj godzine: " << endl;
             cin >> godzina;
 
-            PICKERIA->WyswietlWolneStoliki(data, godzina);
+            PICKERIA->wyswietlWolneStoliki(data, godzina);
 
-            int wybor;
+            int wyborStolika;
             cout << "Wybierz stolik: " << endl;
-            cin >> wybor;
+            cin >> wyborStolika;
 
-            PICKERIA->getStolikONr(wybor).zarezerwujStolik(data, godzina);
+            PICKERIA->getStolikONr(wyborStolika).zarezerwujStolik(data, godzina);
             break;
         case 2:
-            //Zamawianie posilku
+            // Zamawianie posilku
             cout << "Zamawianie posilku" << endl;
             break;
         case 3:
-            //Oplacanie zamowienia
+            // Oplacanie zamowienia
             cout << "Oplacanie zamowienia" << endl;
             break;
         case 4:
-            //Anulowanie rezerwacji stolika
+            // Anulowanie rezerwacji stolika
             cout << "Anulowanie rezerwacji stolika" << endl;
             break;
         case 5:
-            //Anulowanie zamowienia
+            // Anulowanie zamowienia
             cout << "Anulowanie zamowienia" << endl;
             break;
         default:
@@ -439,7 +489,6 @@ int main() {
         break;
     case 2:
     case 3:
-
         if (wybor == 2) cout << "PRACOWNIK" << endl;
         else {
             cout << "KIEROWNIK" << endl;
@@ -456,7 +505,6 @@ int main() {
         if (kierownik) {
             cout << "7. Zamowienie towaru" << endl;
             cout << "8. Zmiana menu" << endl;
-
         }
 
         cout << endl << "0. Zakoncz" << endl;
@@ -464,54 +512,52 @@ int main() {
 
         system("cls");
 
-        switch (wybor)
-        {
+        switch (wybor) {
         case 1:
-            //Przygotowanie zamowienia
+            // Przygotowanie zamowienia
             cout << "Przygotowanie zamowienia" << endl;
             break;
         case 2:
-            //Wydanie zamowienia
+            // Wydanie zamowienia
             cout << "Wydanie zamowienia" << endl;
             break;
         case 3:
-            //Weryfikacja stanu magazynowego
+            // Weryfikacja stanu magazynowego
             cout << "Weryfikacja stanu magazynowego" << endl;
+            PICKERIA->sprawdzStanSkladnikow();
             break;
         case 4:
-            //Anulowanie rezerwacji stolika
+            // Anulowanie rezerwacji stolika
             cout << "Anulowanie rezerwacji stolika" << endl;
             break;
         case 5:
-            //Anulowanie zamowienia
+            // Anulowanie zamowienia
             cout << "Anulowanie zamowienia" << endl;
             break;
         case 6:
-            //raport kasowy
+            // Raport kasowy
             cout << "Raport kasowy" << endl;
             break;
         case 7:
             if (kierownik) {
-                //zamowienie towaru
+                // Zamowienie towaru
                 cout << "Towar" << endl;
             }
             break;
         case 8:
             if (kierownik) {
-                //zmiana menu
+                // Zmiana menu
                 cout << "Nowe menu" << endl;
+                PICKERIA->edytujMenu();
             }
             break;
         default:
             break;
         }
-
         break;
     default:
         break;
     }
-
-
 
     return 0;
 }
