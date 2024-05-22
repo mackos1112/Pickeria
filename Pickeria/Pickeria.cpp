@@ -87,7 +87,10 @@ public:
 
 class Posilek {
 private:
-    list<Skladnik> listaSkladnikow;
+    int nrwMenu;                        //potrzebne dla ulatwienia wskazywania towaru przy zamawianiu - uroki interfejsu tekstowego
+    static int ostatniwMenu;
+    string nazwa;
+    list<Skladnik> listaSkladnikow;     //czy tu nie powinna byc lista typu ElementPosilku???
     float cena;
 
 public:
@@ -99,6 +102,18 @@ public:
         this->cena = cenaZ;
     }
 
+    string getNazwa() {
+        return nazwa;
+    }
+
+    void setNazwa(string nazwaZ) {
+        this->nazwa = nazwaZ;
+    }
+
+    int getNr() {
+        return nrwMenu;
+    }
+
     void dodajSkladnik(Skladnik skladnik) {
         listaSkladnikow.push_back(skladnik);
     }
@@ -107,8 +122,23 @@ public:
         listaSkladnikow.remove(skladnik);
     }
 
-    Posilek() : cena(0) {}
+    bool sprawdzStanSkladnikow(int ilosc) {         //ilosc definiuje ilosc posilkow
+
+        for (Skladnik& skl : listaSkladnikow) {
+            if (ilosc > skl.getIlosc_na_magazynie()) return false;
+        }
+
+
+        return true;
+    }
+
+    Posilek() : cena(0) {
+        ostatniwMenu++;
+        nrwMenu = ostatniwMenu;
+    }
 };
+
+int Posilek::ostatniwMenu = 0;
 
 class ElementZamowienia {
 private:
@@ -132,11 +162,15 @@ private:
     int numerZamowienia;
     list<ElementZamowienia> elementZamowienia;
     float kwota;
-    int numerRezerwacji;
+    string numerRezerwacji;
     int statusZamowienia;
+    static int licznikZamowien;
 
 public:
-    Zamowienie() : kwota(0), statusZamowienia(0) {}
+    Zamowienie() : kwota(0), statusZamowienia(0) {
+        licznikZamowien++;
+        numerZamowienia = licznikZamowien;
+    }
 
     void finalizujZamowienie() {
         // Implementacja metody finalizujZamowienie
@@ -166,11 +200,11 @@ public:
         return numerZamowienia;
     }
 
-    void setNumerRezerwacji(int nr) {
+    void setNumerRezerwacji(string nr) {
         numerRezerwacji = nr;
     }
 
-    int getNumerRezerwacji() {
+    string getNumerRezerwacji() {
         return numerRezerwacji;
     }
 
@@ -178,6 +212,8 @@ public:
         return statusZamowienia;
     }
 };
+
+int Zamowienie::licznikZamowien = 0;
 
 class Platnosc {
 private:
@@ -294,7 +330,7 @@ public:
         liczbaMiejsc = miejsca;
     }
 
-    void zarezerwujStolik(int data, int godzina) {
+    string zarezerwujStolik(int data, int godzina) {
         string imie, nazwisko, telefon;
         int czas, osoby;
 
@@ -324,10 +360,27 @@ public:
 
         cout << "Twoj numer Rezerwacji: " << endl;
         cout << tablicaRezerwacji[i].getRezerwacja();
+
+        return tablicaRezerwacji[i].getRezerwacja();
     }
 
-    void anulujRezerwacjeStolika(int numer) {
-        // Implementacja anulowania rezerwacji stolika
+    void anulujRezerwacjeStolika(string numer) {
+        int indeks = -1;
+        for (int i = 0; i < ostatniaRezerwacja; i++) {
+            if (tablicaRezerwacji[i].getNumer() == numer) {
+                indeks = i;
+                break;
+            }
+        }
+        if (indeks > -1) {
+            for (int i = indeks; i < ostatniaRezerwacja - 1; i++) tablicaRezerwacji[i] = tablicaRezerwacji[i + 1];
+            //delete tablicaRezerwacji[ostatniaRezerwacja];
+            ostatniaRezerwacja--;
+            cout << "Rezerwacja prawidlowo anulowana" << endl;
+        }
+        else {
+            cout << "Blad, nie ma takiej rezerwacji" << endl;
+        }
     }
 
     static int getIloscStolikow() {
@@ -378,10 +431,15 @@ public:
         return stoliki[nr_stolika - 1];
     }
 
+    Posilek& getPosilekONr(int numer) {
+        for (Posilek& posilek : menu) {
+            if (posilek.getNr() == numer) return posilek;
+        }
+    }
+
     void wyswietlBiezaceMenu() {
         for (Posilek& posilek : menu) {
-            cout << "Posilek: " << posilek.getCena() << " zl" << endl;
-            // Implementacja wyświetlania posiłków
+            cout << posilek.getNr() << ". " << posilek.getNazwa() << " " << posilek.getCena() << " zl" << endl;
         }
     }
 
@@ -389,14 +447,13 @@ public:
         // Implementacja edycji menu
     }
 
-    void sprawdzStanSkladnikow() {
-        for (Skladnik& skladnik : skladniki) {
+
+
+    void generujRaportStanowMagazynowych() {                                //przenioslem z sprawdzStanSkladnikow gdyz zgodnie z zmiana diagramu klas przy tworzeniu diagramow sekwencji
+        cout << endl << "Raport Stanow Magazynowych" << endl;               //funkcja sprawdzStanSkladnikow jest odpowiedzialna za zwrocenie informacji czy jest na tyle skladnikow 
+        for (Skladnik& skladnik : skladniki) {                              //aby przygotowac danie, generujRaportStanowMagazynowych sluzy wyswietleniu wszystkich skladnikow
             cout << "Skladnik: " << skladnik.getNazwaSkladnika() << ", Ilosc na magazynie: " << skladnik.getIlosc_na_magazynie() << endl;
         }
-    }
-
-    void generujRaportStanowMagazynowych() {
-        // Implementacja generowania raportu stanów magazynowych
     }
 
     void wprowadzenieTowaru() {
@@ -414,6 +471,7 @@ public:
     void zamowieniePosilku(Zamowienie& zamowienie) {
         zamowienia.push_back(zamowienie);
         cout << "Zamowienie przyjete." << endl;
+        cout << "Numer twojego zamowienia: " << zamowienie.getNumerZamowienia() << endl;
     }
 
     void anulowanieZamowienia(Zamowienie& zamowienie) {
@@ -425,7 +483,17 @@ public:
 int main() {
     SystemRestauracji* PICKERIA = new SystemRestauracji();
 
-    int wybor;
+    //inicjalizacja zmiennych wykorzystywanych pozniej w menu - kompilatorowi sie nie podoba jak inicjalizacja jest wewnatrz case
+    int wybor, wybor2;
+    int data, godzina;
+    int wyborStolika;
+    Zamowienie nowe;
+    string nr;
+    bool kontynuacja;
+    string rezerwacja;
+    //inicjalizacja zmiennych 
+
+
     bool kierownik = false;
     cout << "MENU GLOWNE" << endl;
     cout << "1. Klient" << endl;
@@ -452,7 +520,7 @@ int main() {
         switch (wybor) {
         case 1:
             // Rezerwacja stolika
-            int data, godzina;
+
             cout << "Rezerwacja stolika" << endl;
             cout << "Podaj date: " << endl;
             cin >> data;
@@ -461,7 +529,7 @@ int main() {
 
             PICKERIA->wyswietlWolneStoliki(data, godzina);
 
-            int wyborStolika;
+
             cout << "Wybierz stolik: " << endl;
             cin >> wyborStolika;
 
@@ -470,6 +538,68 @@ int main() {
         case 2:
             // Zamawianie posilku
             cout << "Zamawianie posilku" << endl;
+
+            cout << "Czy zarezerwowales juz stolik? " << endl;
+            cout << "1. Tak" << endl;
+            cout << "2. Nie" << endl;
+            cin >> wybor;
+
+
+            switch (wybor) {
+            case 1:
+                cout << "Podaj numer rezerwacji: " << endl;
+                cin >> nr;
+                break;
+            default:
+
+                //przerobic aby pobieralo czas z momentu zamawiania
+                cout << "Rezerwacja stolika" << endl;
+                cout << "Podaj date: " << endl;
+                cin >> data;
+                cout << "Podaj godzine: " << endl;
+                cin >> godzina;
+
+                PICKERIA->wyswietlWolneStoliki(data, godzina);
+
+                int wyborStolika;
+                cout << "Wybierz stolik: " << endl;
+                cin >> wyborStolika;
+
+                nr = PICKERIA->getStolikONr(wyborStolika).zarezerwujStolik(data, godzina);
+
+                break;
+            }
+            nowe.setNumerRezerwacji(nr);
+            PICKERIA->wyswietlBiezaceMenu();
+            kontynuacja = false;
+            do {
+                cout << "Wybierz co chcialbys zjesc: " << endl;
+                cin >> wybor;
+                cout << "Podaj ilosc: " << endl;
+                cin >> wybor2;
+                if (PICKERIA->getPosilekONr(wybor).sprawdzStanSkladnikow(wybor2)) {
+                    cout << "Dodano do zamowienia: " << PICKERIA->getPosilekONr(wybor).getNazwa() << endl;
+                    ElementZamowienia nowyEl(PICKERIA->getPosilekONr(wybor), wybor2);
+                    nowe.dodajElementZamowienia(nowyEl);
+                    kontynuacja = false;
+                }
+                else {
+                    cout << "Niestety towar niedostepny wybierz cos innego" << endl;
+                    kontynuacja = true;
+                }
+                if (!kontynuacja) {
+                    cout << "Czy chcialbys cos jeszcze zamowic?" << endl;
+                    cout << "1. Tak" << endl;
+                    cout << "2. Nie" << endl;
+                    cin >> wybor;
+                    if (wybor == 1) kontynuacja = true;
+                    else kontynuacja = false;
+                }
+            } while (kontynuacja);
+
+            nowe.setStatusZamowienia(1);        //status 1 - zamowienie przyjete
+            PICKERIA->zamowieniePosilku(nowe);
+
             break;
         case 3:
             // Oplacanie zamowienia
@@ -478,6 +608,14 @@ int main() {
         case 4:
             // Anulowanie rezerwacji stolika
             cout << "Anulowanie rezerwacji stolika" << endl;
+            cout << "Podaj numer stolika: " << endl;
+            cin >> wybor2;
+            cout << "Podaj numer rezerwacji: " << endl;
+
+            cin >> rezerwacja;
+            PICKERIA->getStolikONr(wybor2).anulujRezerwacjeStolika(rezerwacja);
+
+
             break;
         case 5:
             // Anulowanie zamowienia
@@ -524,7 +662,7 @@ int main() {
         case 3:
             // Weryfikacja stanu magazynowego
             cout << "Weryfikacja stanu magazynowego" << endl;
-            PICKERIA->sprawdzStanSkladnikow();
+            PICKERIA->generujRaportStanowMagazynowych();
             break;
         case 4:
             // Anulowanie rezerwacji stolika
