@@ -89,16 +89,20 @@ public:
 class Posilek {
 private:
     vector<ElementPosilku> elementy;
-    int cena;
+    float cena;
 
 public:
-    void dodajElement(ElementPosilku element) {
-        elementy.push_back(element);
-    }
-    int getCena() {
-        return cena;
+    Posilek() : cena(0) {}
 
+    void dodajElement(const ElementPosilku& element) {
+        elementy.push_back(element);
+        cena += element.getKoszt();
     }
+
+    float getCena() const {
+        return cena;
+    }
+
     double getKoszt() const {
         double koszt = 0.0;
         for (const auto& element : elementy) {
@@ -166,7 +170,7 @@ void wczytajPosilki(const string& filename, vector<Posilek>& posilki, const vect
                 });
 
             if (it != skladniki.end()) {
-                ElementPosilku element(std::addressof(*it), ilosc);
+                ElementPosilku element(const_cast<Skladnik*>(&(*it)), ilosc);
                 posilek.dodajElement(element);
             }
         }
@@ -176,9 +180,6 @@ void wczytajPosilki(const string& filename, vector<Posilek>& posilki, const vect
 
     file.close();
 }
-
-
-
 
 class ElementZamowienia {
 private:
@@ -385,7 +386,7 @@ public:
             cout << "Ilosc osob: " << endl;
             cin >> osoby;
             if (osoby > liczbaMiejsc) cout << "Za duzo osob, sprobuj jeszcze raz" << endl;
-            if (osoby <= 0) cout << "Bledna ilsoc osob, sprobuj jeszcze raz" << endl;
+            if (osoby <= 0) cout << "Bledna ilosc osob, sprobuj jeszcze raz" << endl;
         } while (osoby > liczbaMiejsc || osoby <= 0);
 
         int i = ++ostatniaRezerwacja;
@@ -449,9 +450,8 @@ public:
     }
 
     void wyswietlBiezaceMenu() {
-        for (Posilek& posilek : menu) {
-            cout << "Posilek: " << posilek.getCena() << " zl" << endl;
-            // Implementacja wyświetlania posiłków
+        for (const Posilek& posilek : menu) {
+            posilek.wypisz();
         }
     }
 
@@ -460,7 +460,7 @@ public:
     }
 
     void sprawdzStanSkladnikow() {
-        for (Skladnik& skladnik : skladniki) {
+        for (const Skladnik& skladnik : skladniki) {
             cout << "Skladnik: " << skladnik.getNazwaSkladnika() << ", Ilosc na magazynie: " << skladnik.getIlosc_na_magazynie() << endl;
         }
     }
