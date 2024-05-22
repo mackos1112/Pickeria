@@ -2,6 +2,9 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -10,27 +13,32 @@ private:
     string nazwaSkladnika;
     string jednostka;
     double cenaJednostkowa;
-    static int id;
+    static int idCounter;
+    int id;
     int ilosc_na_magazynie;
 
 public:
-    string getNazwaSkladnika() {
+    Skladnik(string nazwa, string jednostkaZ, double cena) : nazwaSkladnika(nazwa), jednostka(jednostkaZ), cenaJednostkowa(cena), ilosc_na_magazynie(0) {
+        id = ++idCounter;
+    }
+
+    string getNazwaSkladnika() const {
         return nazwaSkladnika;
     }
 
-    string getJednostka() {
+    string getJednostka() const {
         return jednostka;
     }
 
-    double getCenaJednostkowa() {
+    double getCenaJednostkowa() const {
         return cenaJednostkowa;
     }
 
-    int getID() {
+    int getID() const {
         return id;
     }
 
-    int getIlosc_na_magazynie() {
+    int getIlosc_na_magazynie() const {
         return ilosc_na_magazynie;
     }
 
@@ -39,7 +47,7 @@ public:
     }
 
     void setNazwaSkladnika(string nazwa) {
-        this->nazwaSkladnika = nazwa;
+        nazwaSkladnika = nazwa;
     }
 
     void setJednostka(string jednostka) {
@@ -47,68 +55,130 @@ public:
     }
 
     void setCenaJednostkowa(double cena) {
-        this->cenaJednostkowa = cena;
-    }
-
-    Skladnik(string nazwa, string jednostkaZ, double cena) : ilosc_na_magazynie(0) {
-        nazwaSkladnika = nazwa;
-        jednostka = jednostkaZ;
         cenaJednostkowa = cena;
-        id++;
     }
-
-    ~Skladnik() {}
 };
 
-int Skladnik::id = 0;
+int Skladnik::idCounter = 0;
 
 class ElementPosilku {
 private:
-    Skladnik** skladnik;
+    Skladnik* skladnik;
     float ilosc;
 
 public:
-    void setIlosc(float number) {
-        this->ilosc = number;
+    ElementPosilku(Skladnik* skl, float ilosc) : skladnik(skl), ilosc(ilosc) {}
+
+    Skladnik* getSkladnik() const {
+        return skladnik;
     }
 
-    float getIlosc() {
+    float getIlosc() const {
         return ilosc;
     }
 
-    ElementPosilku(int size) : ilosc(size) {
-        skladnik = new Skladnik * [size];
+    void setIlosc(float ilosc) {
+        this->ilosc = ilosc;
     }
 
-    ~ElementPosilku() {
-        delete[] skladnik;
+    double getKoszt() const {
+        return ilosc * skladnik->getCenaJednostkowa();
     }
 };
 
 class Posilek {
 private:
-    list<Skladnik> listaSkladnikow;
-    float cena;
+    vector<ElementPosilku> elementy;
+    int cena;
 
 public:
-    float getCena() {
+    void dodajElement(ElementPosilku element) {
+        elementy.push_back(element);
+    }
+    int getCena() {
         return cena;
+
+    }
+    double getKoszt() const {
+        double koszt = 0.0;
+        for (const auto& element : elementy) {
+            koszt += element.getKoszt();
+        }
+        return koszt;
     }
 
-    void setCena(float cenaZ) {
-        this->cena = cenaZ;
+    void wypisz() const {
+        for (const auto& element : elementy) {
+            cout << "Skladnik: " << element.getSkladnik()->getNazwaSkladnika()
+                << ", Ilosc: " << element.getIlosc()
+                << " " << element.getSkladnik()->getJednostka()
+                << ", Koszt: " << element.getKoszt() << " zl" << endl;
+        }
+        cout << "Calkowity koszt posilku: " << getKoszt() << " zl" << endl;
     }
-
-    void dodajSkladnik(Skladnik skladnik) {
-        listaSkladnikow.push_back(skladnik);
-    }
-
-    void usunSkladnik(Skladnik skladnik) {
-        listaSkladnikow.remove(skladnik);
-    }
-
-    Posilek() : cena(0) {}
 };
+
+void wczytajSkladniki(const string& filename, vector<Skladnik>& skladniki) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Nie mozna otworzyc pliku: " << filename << endl;
+        return;
+    }
+
+    string line;
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string nazwa, jednostka, cenaStr;
+        getline(ss, nazwa, ';');
+        getline(ss, jednostka, ';');
+        getline(ss, cenaStr, ';');
+        double cena = stod(cenaStr);
+
+        skladniki.emplace_back(nazwa, jednostka, cena);
+    }
+
+    file.close();
+}
+
+void wczytajPosilki(const string& filename, vector<Posilek>& posilki, const vector<Skladnik>& skladniki) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Nie mozna otworzyc pliku: " << filename << endl;
+        return;
+    }
+
+    string line;
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string elementStr;
+        Posilek posilek;
+
+        while (getline(ss, elementStr, ';')) {
+            stringstream elementSS(elementStr);
+            string nazwaSkladnika, iloscStr;
+            getline(elementSS, nazwaSkladnika, ',');
+            getline(elementSS, iloscStr, ',');
+
+            float ilosc = stof(iloscStr);
+
+            auto it = find_if(skladniki.begin(), skladniki.end(), [&nazwaSkladnika](const Skladnik& s) {
+                return s.getNazwaSkladnika() == nazwaSkladnika;
+                });
+
+            if (it != skladniki.end()) {
+                ElementPosilku element(std::addressof(*it), ilosc);
+                posilek.dodajElement(element);
+            }
+        }
+
+        posilki.push_back(posilek);
+    }
+
+    file.close();
+}
+
+
+
 
 class ElementZamowienia {
 private:
@@ -558,6 +628,15 @@ int main() {
     default:
         break;
     }
+    vector<Skladnik> skladniki;
+    wczytajSkladniki("skladniki.txt", skladniki);
 
+    vector<Posilek> posilki;
+    wczytajPosilki("menu.txt", posilki, skladniki);
+
+    for (const auto& posilek : posilki) {
+        posilek.wypisz();
+        cout << endl;
+    }
     return 0;
 }

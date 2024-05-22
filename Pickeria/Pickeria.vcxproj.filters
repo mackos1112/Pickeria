@@ -19,4 +19,12 @@
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="skladniki.txt">
+      <Filter>Pliki źródłowe</Filter>
+    </Text>
+    <Text Include="menu.txt">
+      <Filter>Pliki źródłowe</Filter>
+    </Text>
+  </ItemGroup>
 </Project>
