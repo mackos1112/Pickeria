@@ -64,20 +64,20 @@ int Skladnik::idCounter = 0;
 class ElementPosilku {
 private:
 	Skladnik* skladnik;
-	float ilosc;
+	int ilosc;
 
 public:
-	ElementPosilku(Skladnik* skl, float ilosc) : skladnik(skl), ilosc(ilosc) {}
+	ElementPosilku(Skladnik* skl, int ilosc) : skladnik(skl), ilosc(ilosc) {}
 
 	Skladnik* getSkladnik() const {
 		return skladnik;
 	}
 
-	float getIlosc() const {
+	int getIlosc() const {
 		return ilosc;
 	}
 
-	void setIlosc(float ilosc) {
+	void setIlosc(int ilosc) {
 		this->ilosc = ilosc;
 	}
 
@@ -132,6 +132,21 @@ public:
 	bool sprawdzStanSkladnikow(int ilosc) const {
 		for (const auto& element : elementy) {
 			if (ilosc > element.getSkladnik()->getIlosc_na_magazynie()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool sciagnijzMagazynu(int ilosc_posilkow) {			//funkcja sluzaca do odejmowaia ilosci skladnikow potrzebnych do zrobienia tego posilku w trakcie przygotowania
+		int ile_odjac = 0;
+		int obecna_ilosc = 0;	//ilosc danego skladnika na magazynie
+		for (const auto& element : elementy) {	
+			obecna_ilosc = element.getSkladnik()->getIlosc_na_magazynie();
+			ile_odjac = ilosc_posilkow * element.getIlosc();
+			element.getSkladnik()->setIlosc_na_magazynie(obecna_ilosc-ile_odjac);
+			if (element.getSkladnik()->getIlosc_na_magazynie() < 0) {
+				cout << "Stan skladnikow na minusie, niedobrze... " << endl;
 				return false;
 			}
 		}
@@ -255,6 +270,13 @@ private:
 	int statusZamowienia;
 	static int licznikZamowien;
 
+	//statusy zamowien
+	//1 - przyjete
+	//2 - w realizacji
+	//3 - gotowe do odbioru
+	//4 - brak stanu magazynowego
+	// ...
+	//9 - anulowane
 public:
 	Zamowienie() : kwota(0), statusZamowienia(0) {
 		licznikZamowien++;
@@ -271,6 +293,35 @@ public:
 
 	void przygotujZamowienie() {
 		// Implementacja metody przygotujZamowienie
+		this->setStatusZamowienia(2);
+		bool czy_w_pelni_zrealizowane = true;
+		for (const auto& element : elementZamowienia) {
+			if (element.getPosilek().sprawdzStanSkladnikow(element.getIlosc())) {
+				if (element.getPosilek().sciagnijzMagazynu(element.getIlosc()))
+					cout << "Prawidlowo sciagnieto sklaadniki dla :" << element.getPosilek().getNazwa();
+			}
+			else {
+				cout << "Brak skladnikow na posilek: " << element.getPosilek().getNazwa();
+				czy_w_pelni_zrealizowane = false;
+			}
+		}
+		cout << "Zakonczono przygotowanie" << endl;
+		if (czy_w_pelni_zrealizowane) {
+			this->setStatusZamowienia(3);	// status gotowe do odbioru
+			cout << "Zamowienie gotowe do odbioru" << endl;
+		}
+		else {
+			int decyzja;
+			this->setStatusZamowienia(4);	//status brak stanu magazynowego
+			cout << "Zamowienie nie kompletne czy anulowac?" << endl;
+			cout << "1. Tak" << endl;
+			cout << "2. Nie" << endl;
+			cin >> decyzja;
+			if (decyzja == 1) this->anulujZamowienie();
+			else {
+				//co w takiej sytuacji ze skladnikow brak a nie chcemy anulowac zamowienia
+			}
+		}
 	}
 
 	void setStatusZamowienia(int status) {
@@ -528,6 +579,12 @@ public:
 		throw invalid_argument("Posilek o podanym numerze nie istnieje.");
 	}
 
+	Zamowienie& getZamowienieONr(int numer) {
+		for (Zamowienie& zam : zamowienia) {
+			if (zam.getNumerZamowienia() == numer) return zam;
+		}
+	}
+
 	void wyswietlBiezaceMenu() const {
 		for (const Posilek& posilek : menu) {
 			posilek.wypisz();
@@ -540,12 +597,6 @@ public:
 
 	void generujRaportStanowMagazynowych() const {
 		cout << endl << "Raport Stanow Magazynowych" << endl;
-		for (const Skladnik& skladnik : skladniki) {
-			cout << "Skladnik: " << skladnik.getNazwaSkladnika() << ", Ilosc na magazynie: " << skladnik.getIlosc_na_magazynie() << endl;
-		}
-	}
-
-	void sprawdzStanSkladnikow() const {
 		for (const Skladnik& skladnik : skladniki) {
 			cout << "Skladnik: " << skladnik.getNazwaSkladnika() << ", Ilosc na magazynie: " << skladnik.getIlosc_na_magazynie() << endl;
 		}
@@ -740,6 +791,10 @@ int main() {
 		case 1:
 			// Przygotowanie zamowienia
 			cout << "Przygotowanie zamowienia" << endl;
+			cout << "Podaj numer zamowienia: " << endl;
+			cin >> wybor;
+			PICKERIA->getZamowienieONr(wybor).przygotujZamowienie();
+
 			break;
 		case 2:
 			// Wydanie zamowienia
