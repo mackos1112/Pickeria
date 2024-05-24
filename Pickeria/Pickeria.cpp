@@ -88,7 +88,8 @@ public:
 
 class Posilek {
 private:
-	int nrwMenu;
+
+	int nrwMenu;                        //potrzebne dla ulatwienia wskazywania towaru przy zamawianiu - uroki interfejsu tekstowego
 	static int ostatniwMenu;
 	string nazwa;
 	vector<ElementPosilku> elementy;
@@ -138,13 +139,14 @@ public:
 		return true;
 	}
 
-	bool sciagnijzMagazynu(int ilosc_posilkow) {
+
+	bool sciagnijzMagazynu(int ilosc_posilkow) {			//funkcja sluzaca do odejmowaia ilosci skladnikow potrzebnych do zrobienia tego posilku w trakcie przygotowania
 		int ile_odjac = 0;
-		int obecna_ilosc = 0;
-		for (const auto& element : elementy) {
+		int obecna_ilosc = 0;	//ilosc danego skladnika na magazynie
+		for (const auto& element : elementy) {	
 			obecna_ilosc = element.getSkladnik()->getIlosc_na_magazynie();
 			ile_odjac = ilosc_posilkow * element.getIlosc();
-			element.getSkladnik()->setIlosc_na_magazynie(obecna_ilosc - ile_odjac);
+			element.getSkladnik()->setIlosc_na_magazynie(obecna_ilosc-ile_odjac);
 			if (element.getSkladnik()->getIlosc_na_magazynie() < 0) {
 				cout << "Stan skladnikow na minusie, niedobrze... " << endl;
 				return false;
@@ -243,7 +245,6 @@ void wczytajPosilki(const string& filename, vector<Posilek>& posilki, const vect
 
 	file.close();
 }
-
 // Forward declaration of Zamowienie
 class Zamowienie;
 
@@ -275,13 +276,13 @@ private:
 public:
 	Platnosc(Zamowienie* zam, float nap) : zamowienie(zam), napiwek(nap), statusPlatnosci(0) {}
 	int zaplac() {
-		statusPlatnosci = 1; // P³atnoœæ zrealizowana
+		statusPlatnosci = 1; // Pï¿½atnoï¿½ï¿½ zrealizowana
 		//zamowienie->setStatusZamowienia(31);
 		return 1;
 	}
 
 	void anulujPlatnosc() {
-		statusPlatnosci = 9; // P³atnoœæ anulowana
+		statusPlatnosci = 9; // Pï¿½atnoï¿½ï¿½ anulowana
 		//zamowienie->setStatusZamowienia(90);
 	}
 
@@ -291,6 +292,7 @@ public:
 
 	int getStatusPlatnosci() const {
 		return statusPlatnosci;
+
 	}
 };
 int Platnosc::licznikPlatnosci = 0;
@@ -305,7 +307,6 @@ public:
 	}
 	void wydajReszte() {
 		//nie dziala dostep do zamowienia
-		//cout << "Wydano " << otrzymanaGotowka - (zamowienie->getKwota() + getNapiwek());
 	}
 };
 
@@ -694,6 +695,7 @@ public:
 			if (zam.getNumerZamowienia() == numer) return zam;
 		}
 		throw invalid_argument("Zamowienie o podanym numerze nie istnieje.");
+
 	}
 
 	void wyswietlBiezaceMenu() const {
@@ -722,7 +724,8 @@ public:
 	}
 
 	void raportMiesieczny() {
-		// Implementacja raportu miesiêcznego
+		// Implementacja raportu miesiÄ™cznego
+
 	}
 
 	void zamowieniePosilku(Zamowienie& zamowienie) {
@@ -848,7 +851,9 @@ int main() {
 				}
 			} while (kontynuacja);
 
+
 			nowe.setStatusZamowienia(10);        //status 10 - zamowienie przyjete
+
 			PICKERIA->zamowieniePosilku(nowe);
 
 			break;
@@ -917,6 +922,7 @@ int main() {
 			cout << "Podaj numer zamowienia: " << endl;
 			cin >> wybor;
 			PICKERIA->getZamowienieONr(wybor).finalizujZamowienie();
+
 			break;
 		case 3:
 			// Weryfikacja stanu magazynowego

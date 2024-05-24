@@ -1,0 +1,3 @@
+Margherita;25.0;Mozzarella,Tomato,Basil,Flour,OliveOil
+Pepperoni;30.0;Mozzarella,Tomato,Pepperoni,Flour,OliveOil
+Veggie;28.0;Mozzarella,Tomato,Mushroom,Onion,GreenPepper,Flour,OliveOil

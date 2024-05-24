@@ -1,0 +1,9 @@
+Mozzarella;kg;20.0;50
+Tomato;kg;15.0;30
+Basil;g;100.0;500
+OliveOil;L;10.0;10
+Flour;kg;5.0;100
+Pepperoni;kg;30.0;20
+Mushroom;kg;12.0;25
+Onion;kg;8.0;40
+GreenPepper;kg;15.0;30
