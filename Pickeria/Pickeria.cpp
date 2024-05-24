@@ -88,6 +88,7 @@ public:
 
 class Posilek {
 private:
+
 	int nrwMenu;                        //potrzebne dla ulatwienia wskazywania towaru przy zamawianiu - uroki interfejsu tekstowego
 	static int ostatniwMenu;
 	string nazwa;
@@ -137,6 +138,7 @@ public:
 		}
 		return true;
 	}
+
 
 	bool sciagnijzMagazynu(int ilosc_posilkow) {			//funkcja sluzaca do odejmowaia ilosci skladnikow potrzebnych do zrobienia tego posilku w trakcie przygotowania
 		int ile_odjac = 0;
@@ -243,6 +245,8 @@ void wczytajPosilki(const string& filename, vector<Posilek>& posilki, const vect
 
 	file.close();
 }
+// Forward declaration of Zamowienie
+class Zamowienie;
 
 class ElementZamowienia {
 private:
@@ -261,6 +265,76 @@ public:
 	}
 };
 
+class Platnosc {
+private:
+	static int licznikPlatnosci;
+	int numerPlatnosci;
+	float napiwek;
+	int statusPlatnosci = 0;
+	Zamowienie* zamowienie;
+
+public:
+	Platnosc(Zamowienie* zam, float nap) : zamowienie(zam), napiwek(nap), statusPlatnosci(0) {}
+	int zaplac() {
+		statusPlatnosci = 1; // P�atno�� zrealizowana
+		//zamowienie->setStatusZamowienia(31);
+		return 1;
+	}
+
+	void anulujPlatnosc() {
+		statusPlatnosci = 9; // P�atno�� anulowana
+		//zamowienie->setStatusZamowienia(90);
+	}
+
+	float getNapiwek() const {
+		return napiwek;
+	}
+
+	int getStatusPlatnosci() const {
+		return statusPlatnosci;
+
+	}
+};
+int Platnosc::licznikPlatnosci = 0;
+
+class Gotowka : public Platnosc {
+private:
+	float otrzymanaGotowka;
+
+public:
+	Gotowka(Zamowienie* zam, float nap, float otrzGotowka) : Platnosc(zam, nap) {
+		otrzymanaGotowka = otrzGotowka;
+	}
+	void wydajReszte() {
+		//nie dziala dostep do zamowienia
+	}
+};
+
+class Karta : public Platnosc {
+private:
+	string nazwaKarty;
+	string typKarty;
+	string nazwaBanku;
+	string dataWaznosci; // Typ zmieniony na string dla uproszczenia
+
+public:
+	Karta(Zamowienie* zam, float nap, string nK, string nB, string typ, string dataW) : Platnosc(zam, nap) {
+		nazwaKarty = nK;
+		nazwaBanku = nB;
+		typKarty = typ;
+		dataWaznosci = dataW;
+	}
+	bool autoryzacja() {
+		// mozna placic tylko VISA
+		if (nazwaKarty == "VISA") {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+};
+
 class Zamowienie {
 private:
 	int numerZamowienia;
@@ -268,15 +342,16 @@ private:
 	float kwota;
 	string numerRezerwacji;
 	int statusZamowienia;
+	//10 zamowienie przyjmowane
+	//11 zamowienie przyjete nie oplacone
+	//12 nie oplacone w przygotowaniu
+	//13 nie oplacone do wydania
+	//21 przyjete ooplacone
+	//22 oplacone i w przygotoweaniu
+	//23 oplacone do wydania
+	//31 final - oplacone i wydane
+	//90 anulowane
 	static int licznikZamowien;
-
-	//statusy zamowien
-	//1 - przyjete
-	//2 - w realizacji
-	//3 - gotowe do odbioru
-	//4 - brak stanu magazynowego
-	// ...
-	//9 - anulowane
 public:
 	Zamowienie() : kwota(0), statusZamowienia(0) {
 		licznikZamowien++;
@@ -284,11 +359,32 @@ public:
 	}
 
 	void finalizujZamowienie() {
-		// Implementacja metody finalizujZamowienie
+		if (statusZamowienia == 13)
+		{
+			if (zaplac())
+			{
+				statusZamowienia = 31;
+				cout << "Zamowienie wydane, zyczymy smacznego" << endl;
+			}
+			else
+			{
+				statusZamowienia = 90;
+				cout << "Zamowienie nie wydane" << endl;
+			}
+		}
+		else if (statusZamowienia == 23)
+		{
+			statusZamowienia = 31;
+			cout << "Zamowienie wydane, zyczymy smacznego" << endl;
+		}
+		else
+		{
+			cout << "Nie mozna wydac tego zamowienia" << endl;
+		}
 	}
 
 	void anulujZamowienie() {
-		statusZamowienia = 9; // Status anulowane
+		statusZamowienia = 90; // Status anulowane
 	}
 
 	void przygotujZamowienie() {
@@ -307,12 +403,12 @@ public:
 		}
 		cout << "Zakonczono przygotowanie" << endl;
 		if (czy_w_pelni_zrealizowane) {
-			this->setStatusZamowienia(3);	// status gotowe do odbioru
+			this->setStatusZamowienia(3);    // status gotowe do odbioru
 			cout << "Zamowienie gotowe do odbioru" << endl;
 		}
 		else {
 			int decyzja;
-			this->setStatusZamowienia(4);	//status brak stanu magazynowego
+			this->setStatusZamowienia(4);    //status brak stanu magazynowego
 			cout << "Zamowienie nie kompletne czy anulowac?" << endl;
 			cout << "1. Tak" << endl;
 			cout << "2. Nie" << endl;
@@ -322,6 +418,70 @@ public:
 				//co w takiej sytuacji ze skladnikow brak a nie chcemy anulowac zamowienia
 			}
 		}
+	}
+
+	bool zaplac() {
+		system("cls");
+		cout << "Do zaplaty " << kwota << "zl" << endl;
+		cout << "Karta czy gotowka?" << endl;
+		cout << "1. Karta" << endl;
+		cout << "2. Gotowka" << endl;
+		int wyborPlatnosci;
+		do {
+			cin >> wyborPlatnosci;
+			if (wyborPlatnosci == 1) {
+				system("cls");
+				string nK, nB, typ, dataW;
+				float nap;
+				cout << "Podaj nazwe karty: ";
+				cin >> nK;
+				cout << endl << "Podaj nazwe banku: ";
+				cin >> nB;
+				cout << endl << "Podaj date waznosi karty: ";
+				cin >> dataW;
+				cout << endl << "Podaj typ karty (kredytowa, debetowa itp.): ";
+				cin >> typ;
+				cout << endl << "Podaj wysokosc napiwku jaki chcesz przeznaczyc: ";
+				cin >> nap;
+				Karta platnoscKarta(this, nap, nK, nB, typ, dataW);
+
+				if (platnoscKarta.autoryzacja())
+				{
+					platnoscKarta.zaplac();
+					statusZamowienia += 10;
+					return true;
+				}
+				else
+				{
+					anulujZamowienie();
+					return false;
+				}
+			}
+			else if (wyborPlatnosci == 2) {
+				float nap, otrzymGotowka;
+				system("cls");
+				cout << "Podaj wysokosc napiwku jaki chcesz przeznaczyc: ";
+				cin >> nap;
+				cout << endl << "Podaj kwote jaka wplacasz: ";
+				cin >> otrzymGotowka;
+				cout << endl;
+				if (otrzymGotowka >= kwota)
+				{
+					Gotowka platnoscGotowka(this, nap, otrzymGotowka);
+					statusZamowienia += 10;
+					return true;
+				}
+				else
+				{
+					anulujZamowienie();
+					return false;
+				}
+			}
+			else {
+				system("cls");
+				cout << "Wybierz poprawna metode platnosci" << endl;
+			}
+		} while (wyborPlatnosci != 1 && wyborPlatnosci != 2);
 	}
 
 	void setStatusZamowienia(int status) {
@@ -354,55 +514,6 @@ public:
 };
 
 int Zamowienie::licznikZamowien = 0;
-
-class Platnosc {
-private:
-	int numerPlatnosci;
-	Zamowienie zamowienie;
-	float napiwek;
-	int statusPlatnosci;
-
-public:
-	int zaplac() {
-		statusPlatnosci = 1; // Płatność zrealizowana
-		return 1;
-	}
-
-	void anulujPlatnosc() {
-		statusPlatnosci = 9; // Płatność anulowana
-	}
-
-	float getNapiwek() const {
-		return napiwek;
-	}
-
-	int getStatusPlatnosci() const {
-		return statusPlatnosci;
-	}
-};
-
-class Gotowka : public Platnosc {
-private:
-	float otrzymanaGotowka;
-
-public:
-	void wydajReszte() {
-		// Implementacja metody wydajReszte
-	}
-};
-
-class Karta : public Platnosc {
-private:
-	string nazwaKarty;
-	string typKarty;
-	string nazwaBanku;
-	string dataWaznosci; // Typ zmieniony na string dla uproszczenia
-
-public:
-	void autoryzacja() {
-		// Implementacja metody autoryzacja
-	}
-};
 
 class Rezerwacja {
 private:
@@ -583,6 +694,8 @@ public:
 		for (Zamowienie& zam : zamowienia) {
 			if (zam.getNumerZamowienia() == numer) return zam;
 		}
+		throw invalid_argument("Zamowienie o podanym numerze nie istnieje.");
+
 	}
 
 	void wyswietlBiezaceMenu() const {
@@ -612,6 +725,7 @@ public:
 
 	void raportMiesieczny() {
 		// Implementacja raportu miesięcznego
+
 	}
 
 	void zamowieniePosilku(Zamowienie& zamowienie) {
@@ -737,13 +851,19 @@ int main() {
 				}
 			} while (kontynuacja);
 
-			nowe.setStatusZamowienia(1);        //status 1 - zamowienie przyjete
+
+			nowe.setStatusZamowienia(10);        //status 10 - zamowienie przyjete
+
 			PICKERIA->zamowieniePosilku(nowe);
 
 			break;
 		case 3:
 			// Oplacanie zamowienia
 			cout << "Oplacanie zamowienia" << endl;
+			cout << "Podaj numer zamowienia" << endl;
+			cin >> wybor2;
+			PICKERIA->getZamowienieONr(wybor2).zaplac();
+
 			break;
 		case 4:
 			// Anulowanie rezerwacji stolika
@@ -799,6 +919,10 @@ int main() {
 		case 2:
 			// Wydanie zamowienia
 			cout << "Wydanie zamowienia" << endl;
+			cout << "Podaj numer zamowienia: " << endl;
+			cin >> wybor;
+			PICKERIA->getZamowienieONr(wybor).finalizujZamowienie();
+
 			break;
 		case 3:
 			// Weryfikacja stanu magazynowego
